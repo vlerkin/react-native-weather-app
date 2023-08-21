@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { WeatherData, WeatherForecast } from "./interfaces";
 import { apiKey } from "./secrets";
+import * as Location from "expo-location";
 
 const monthNumbers = {
   "01": "Jan",
@@ -36,18 +37,53 @@ export default function App() {
     null
   );
   const [forecast, setForecast] = useState<WeatherForecast | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<{
+    latitude: Number;
+    longitude: number;
+  } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   useEffect(() => {
+    const getLocationFromDevice = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      let address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      setCoordinates({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      if (address.length > 0) {
+        let city = address[0].city;
+        setCity(city);
+      }
+    };
+    getLocationFromDevice();
     const getCurrentWeatherFromApi = async () => {
+      if (!coordinates) {
+        return;
+      }
       const response = await axios.get(
-        `${apiUrl}/current.json?key=${apiKey}&q=48.8567,2.3508`
+        `${apiUrl}/current.json?key=${apiKey}&q=${coordinates.latitude},${coordinates.longitude}`
       );
       const answerFromApi = response.data;
       setCurrentWeather(answerFromApi);
     };
     getCurrentWeatherFromApi();
     const getWeatherForecastFromApi = async () => {
+      if (!coordinates) {
+        return;
+      }
       const response = await axios.get(
-        `${apiUrl}/forecast.json?key=${apiKey}&q=48.8567,2.3508&days=14`
+        `${apiUrl}/forecast.json?key=${apiKey}&q=${coordinates.latitude},${coordinates.longitude}&days=14`
       );
       const answerFromApi = response.data;
       setForecast(answerFromApi);
@@ -55,15 +91,19 @@ export default function App() {
     getWeatherForecastFromApi();
   }, []);
   if (!currentWeather) {
-    return <Text>Loading...</Text>;
+    return <Text style={styles.loadingText}>Loading...</Text>;
   }
   if (!forecast) {
-    return <Text>Loading...</Text>;
+    return <Text style={styles.loadingText}>Loading...</Text>;
   }
+  if (!city || !coordinates) {
+    return <Text style={styles.loadingText}>{errorMsg}</Text>;
+  }
+
   return (
     <SafeAreaView>
-      <View style={styles.container}>
-        <Text style={styles.textAlignCenter}>Weather now</Text>
+      <View style={[styles.container]}>
+        <Text style={styles.textAlignCenter}>{city}</Text>
         <View style={[styles.currentWeatherContainer]}>
           <Image
             source={{ uri: `http:${currentWeather.current.condition.icon}` }}
@@ -109,7 +149,7 @@ export default function App() {
           data={forecast.forecast.forecastday}
           renderItem={({ item: aDay }) => (
             <View style={styles.forecastContainer}>
-              <Text>
+              <Text style={styles.forecastDate}>
                 {
                   monthNumbers[
                     aDay.date.split("-")[1] as keyof typeof monthNumbers
@@ -172,7 +212,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   flatListForecast: {
-    height: "57%",
+    height: "55%",
   },
   textAlignCenter: {
     textAlign: "center",
@@ -180,9 +220,10 @@ const styles = StyleSheet.create({
   forecastHeader: {
     marginTop: 15,
     fontSize: 16,
-    borderColor: "black",
+    borderColor: "#d9dbdb",
     borderWidth: 1,
     paddingVertical: 5,
+    borderRadius: 5,
   },
   horizontalHourForecast: {
     height: "10%",
@@ -211,12 +252,19 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   forecastGridContainer: {
-    paddingTop: 3,
     alignItems: "center",
     alignContent: "center",
     justifyContent: "center",
   },
   minMaxTemp: {
     fontSize: 12,
+    marginTop: 3,
+  },
+  forecastDate: {
+    fontWeight: "500",
+  },
+  loadingText: {
+    marginTop: 50,
+    marginLeft: 50,
   },
 });
