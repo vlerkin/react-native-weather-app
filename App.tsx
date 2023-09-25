@@ -43,53 +43,56 @@ export default function App() {
     longitude: number;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   useEffect(() => {
-    const getLocationFromDevice = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
+    try {
+      const getLocationFromDevice = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
 
-      let location = await Location.getCurrentPositionAsync({});
-      let address = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      setCoordinates({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      if (address.length > 0) {
-        let city = address[0].city;
-        setCity(city);
-      }
-    };
-    getLocationFromDevice();
-    const getCurrentWeatherFromApi = async () => {
-      if (!coordinates) {
-        return;
-      }
-      const response = await axios.get(
-        `${apiUrl}/current.json?key=${apiKey}&q=${coordinates.latitude},${coordinates.longitude}`
-      );
-      const answerFromApi = response.data;
-      setCurrentWeather(answerFromApi);
-    };
-    getCurrentWeatherFromApi();
-    const getWeatherForecastFromApi = async () => {
-      if (!coordinates) {
-        return;
-      }
-      const response = await axios.get(
-        `${apiUrl}/forecast.json?key=${apiKey}&q=${coordinates.latitude},${coordinates.longitude}&days=14`
-      );
-      const answerFromApi = response.data;
-      setForecast(answerFromApi);
-    };
-    getWeatherForecastFromApi();
-  }, []);
+        let location = await Location.getCurrentPositionAsync({});
+        let address = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        setCoordinates({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        if (address.length > 0) {
+          let city = address[0].city;
+          setCity(city);
+        }
+      };
+      getLocationFromDevice();
+      const getCurrentWeatherFromApi = async () => {
+        if (!coordinates) {
+          return;
+        }
+        const response = await axios.get(
+          `${apiUrl}/current.json?key=${apiKey}&q=${coordinates.latitude},${coordinates.longitude}`
+        );
+        const answerFromApi = response.data;
+        setCurrentWeather(answerFromApi);
+      };
+      getCurrentWeatherFromApi();
+      const getWeatherForecastFromApi = async () => {
+        if (!coordinates) {
+          return;
+        }
+        const response = await axios.get(
+          `${apiUrl}/forecast.json?key=${apiKey}&q=${coordinates.latitude},${coordinates.longitude}&days=14`
+        );
+        const answerFromApi = response.data;
+        setForecast(answerFromApi);
+      };
+      getWeatherForecastFromApi();
+    } catch (error) {
+      console.log(error);
+    }
+  }, [coordinates]);
   if (!currentWeather) {
     return <Text style={styles.loadingText}>Loading...</Text>;
   }
