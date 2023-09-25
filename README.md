@@ -1,5 +1,5 @@
 ## Project Description
-This Weather App was created using React Native as part of workshop at Mind Mingle Bootcamp. I chose to build Weather App because I wanted also to work with Expo Location library that allows to read geolocation data and more, also it was great to play with flexbox and grid analogues in React Native. Weather data received via API from https://www.weatherapi.com.
+This Weather App was created using React Native as part of workshop at Mind Mingle Bootcamp. I chose to build Weather App because I wanted to try out Expo Location library that allows to read geolocation data and more, also it was great to play with flexbox and grid analogues in React Native. Weather data received via API from https://www.weatherapi.com.
 To develop and run the app I used Expo Go app for my phone (works on iOS and Android).
 
 ## How does the app look like
