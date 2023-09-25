@@ -25,6 +25,6 @@ npm install
 ```
 npx expo start
 ```
-7. You will see a QR code in your terminal, scan it with your camera on iPhone or in Expo Go app on Android and you will see system asking you to allow it get access to your location, please, tap "allow once" or any other option that allows access. Note: your devices should be connected to the same network.
+7. You will see a QR code in your terminal. Scan it with your camera on iPhone or with the Expo Go app on Android. The system will then prompt you to allow access to your location. Please tap 'allow once' or choose any other permissive option. Note: your devices should be connected to the same network.
 
 In case of any problems with older versions, you can upgrade expo or other dependencies and run the app again. 
