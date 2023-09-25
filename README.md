@@ -11,7 +11,7 @@ https://drive.google.com/file/d/150x7XwV-T-Ork5uI2lFRuVkYdSWO3ZVn/view?usp=share
 ```
 git clone git@github.com:vlerkin/react-native-weather-app.git
 ```
-2. To access weather data you need to obtain your personal api key on the website https://www.weatherapi.com;
+2. To access weather data you need to obtain your personal api key on the website https://www.weatherapi.com
 3. Create a file secrets.ts in a root derictory and paste your key there
 ```
 export const apiKey = "put your key here"
